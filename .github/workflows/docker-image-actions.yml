@@ -7,7 +7,7 @@ on:
     tags:
       - v*
 env:
-  TEST_TAG: user/myapp:test
+  TEST_TAG: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:test
   
 jobs:
   docker:
@@ -49,6 +49,6 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
           push: true
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/simplewhale:buildcache,mode=max
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:buildcache,mode=max
