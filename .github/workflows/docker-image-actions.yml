@@ -7,8 +7,6 @@ on:
       - master
     tags:
       - v*
-env:
-  TEST_TAG: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:test
   
 jobs:
   docker:
@@ -22,18 +20,7 @@ jobs:
         uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-   
-      - name: Build and export to Docker
-        uses: docker/build-push-action@v2
-        with:
-          context: .
-          load: true
-          tags: ${{ env.TEST_TAG }}
-      - name: Test
-        run: |
-          docker run --rm ${{ env.TEST_TAG }}
-          
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}       
           
       - name: Build and push
         uses: docker/build-push-action@v2
