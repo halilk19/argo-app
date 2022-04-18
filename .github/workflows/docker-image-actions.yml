@@ -1,12 +1,15 @@
 name: Docker Build Test and Push DockerHub
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
       - master
     tags:
       - v*
-
+env:
+  TEST_TAG: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:test
+  
 jobs:
   docker:
     runs-on: ubuntu-latest
@@ -20,7 +23,18 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-                           
+   
+      - name: Build and export to Docker
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          load: true
+          tags: ${{ env.TEST_TAG }}
+      - name: Test
+        run: |
+          docker run --rm ${{ env.TEST_TAG }}
+          
+          
       - name: Build and push
         uses: docker/build-push-action@v2
         with:
@@ -29,5 +43,4 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           push: true
           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:latest
-          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:buildcache
-          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:buildcache,mode=max
+
