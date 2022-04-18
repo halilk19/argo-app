@@ -1,0 +1,11 @@
+image: atlassian/default-image:3
+pipelines:
+  default:
+    - step:
+        script:
+          - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
+          - VERSION="0.1.${BITBUCKET_BUILD_NUMBER}"
+          - docker build -t halilkarimis/argo-test:"${VERSION}" .
+          - docker push halilkarimis/argo-test:"${VERSION}"
+        services:
+          - docker
