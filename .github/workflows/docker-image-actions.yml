@@ -1,96 +1,54 @@
-name: ci
 
+name: Docker Build Test and Push DockerHub
 on:
+  workflow_dispatch:
   push:
     branches:
-      - 'master'
+      - main
+      - master
     tags:
-      - 'v*'
-  pull_request:
-    branches:
-      - 'master'
-
+      - v*
+  
 jobs:
   docker:
     runs-on: ubuntu-latest
     steps:
-      -
-        name: Checkout
+      - name: Checkout
         uses: actions/checkout@v2
-      -
-        name: Docker meta
+        
+      - name: Docker meta
         id: meta
         uses: docker/metadata-action@v3
         with:
           images: name/app
           tags: |
-            type=ref,event=branch
-            type=ref,event=pr
             type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-      -
-        name: Login to DockerHub
-        if: github.event_name != 'pull_request'
-        uses: docker/login-action@v1
+            type=semver,pattern={{major}}.{{minor}} 
+            type=semver,pattern={{version}},value=v1.0.0        
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+      - name: Login to DockerHub
+        uses: docker/login-action@v1 
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}
-      -
-        name: Build and push
+          password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}       
+
+      - name: Set outputs
+        id: vars
+        run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
+      - name: Check outputs
+        run: echo 
+        
+      - name: Build and push
         uses: docker/build-push-action@v2
         with:
-          context: .
-          push: ${{ github.event_name != 'pull_request' }}
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-
-
-
-# name: Docker Build Test and Push DockerHub
-# on:
-#   workflow_dispatch:
-#   push:
-#     branches:
-#       - main
-#       - master
-#     tags:
-#       - v*
-  
-# jobs:
-#   docker:
-#     runs-on: ubuntu-latest
-#     steps:
-#       - name: Checkout
-#         uses: actions/checkout@v2
-        
-#       - name: Docker meta
-#         id: meta
-#         uses: docker/metadata-action@v3
-#         with:
-#           images: name/app
-#           tags: |
-#             type=semver,pattern={{version}}
-#             type=semver,pattern={{major}}.{{minor}} 
-#             type=semver,pattern={{version}},value=v1.0.0        
-
-#       - name: Set up Docker Buildx
-#         uses: docker/setup-buildx-action@v1
-#       - name: Login to DockerHub
-#         uses: docker/login-action@v1 
-#         with:
-#           username: ${{ secrets.DOCKER_HUB_USERNAME }}
-#           password: ${{ secrets.DOCKER_HUB_ACCESS_TOKEN }}       
-
-
-#       - name: Build and push
-#         uses: docker/build-push-action@v2
-#         with:
-#           context: ./
-#           file: ./Dockerfile
-#           builder: ${{ steps.buildx.outputs.name }}
-#     # build on feature branches, push only on main branch
-#           push: ${{ github.ref == 'refs/heads/main' }}
-#           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:${{ steps.meta.outputs.tags }}
-#           labels: ${{ steps.meta.outputs.labels }}          
+          context: ./
+          file: ./Dockerfile
+          builder: ${{ steps.buildx.outputs.name }}
+    # build on feature branches, push only on main branch
+          push: ${{ github.ref == 'refs/heads/main' }}
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:v1.0.${{ steps.vars.outputs.sha_short }}
+          labels: ${{ steps.meta.outputs.labels }}          
           
-# #           push: ${{ github.event_name != 'pull_request' }}
+#           push: ${{ github.event_name != 'pull_request' }}
