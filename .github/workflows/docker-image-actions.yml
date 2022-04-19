@@ -37,5 +37,6 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
     # build on feature branches, push only on main branch
           push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:{{major}}.{{minor}}
+          tags: type=semver,pattern={{major}}.{{minor}}
+#           tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:{{major}}.{{minor}}
 
