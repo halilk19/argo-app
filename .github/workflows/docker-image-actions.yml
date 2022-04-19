@@ -47,8 +47,8 @@ jobs:
           file: ./Dockerfile
           builder: ${{ steps.buildx.outputs.name }}
     # build on feature branches, push only on main branch
-          push: ${{ github.ref == 'refs/heads/main' }}
-          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:"v1.0.${{ steps.vars.outputs.sha_short }}"
-          labels: ${{ steps.meta.outputs.labels }}          
+          push: ${{ github.ref == 'refs/heads/main' }"
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/argocd-test-app:v1.0.${{ steps.vars.outputs.sha_short }}
+        
           
 #           push: ${{ github.event_name != 'pull_request' }}
